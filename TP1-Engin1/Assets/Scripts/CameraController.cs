@@ -9,6 +9,10 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     private float m_rotationSpeed = 1.0f;
     [SerializeField]
+    private float maxScrollDist = 5;
+    [SerializeField]
+    private float minScrollDist = -5;
+    [SerializeField]
     private Vector2 m_clampingValue = Vector2.zero;
    
     void Update()
@@ -17,17 +21,19 @@ public class CameraController : MonoBehaviour
         UpdateVerticalMove();
         UpdateCameraScroll();
     }
+   
     private void FixedUpdate()
     {
         FixedUpdateTestCameraObstruction();
     }
-
+   
     private void UpdateHorizontalMove()
     {
         // angle en degrée. Sin donnne la composante y du cercle et Cos donne la composante x du cercle
         float currentAngleX = Input.GetAxis("Mouse X") * m_rotationSpeed;
         transform.RotateAround(m_objectToLookAt.position, m_objectToLookAt.up, currentAngleX);
     }
+    
     private void UpdateVerticalMove()
     {
         // angle en degrée. Sin donnne la composante y du cercle et Cos donne la composante x du cercle
@@ -47,15 +53,21 @@ public class CameraController : MonoBehaviour
 
     private void UpdateCameraScroll()
     {
-        if(Input.mouseScrollDelta.y !=0)
+        if (Input.mouseScrollDelta.y !=0)
         {
-            // todo a check of distance if reach max et min distance and lerp plutot que d'effectuer immédiatement la translation
+            // Todo: a check of distance if reach max et min distance
+            // Todo: lerp plutot que d'effectuer immédiatement la translation
+            float newDistance = Mathf.Clamp(transform.position.z + Input.mouseScrollDelta.y, minScrollDist, maxScrollDist);
             transform.Translate(Vector3.forward * Input.mouseScrollDelta.y, Space.Self);
+            Vector3 targetPosition = new Vector3(transform.position.x, transform.position.y, newDistance);
+            float lerpSpeed = 5.0f; // Adjust the speed as needed
+            transform.position = Vector3.Lerp(transform.position, targetPosition, lerpSpeed * Time.deltaTime);
         }
     }
-
+    
     private void FixedUpdateTestCameraObstruction()
     {
+        // Bit shift the index of the layer (8) to get a bit mask
         int layerMask = 1 << 8;
 
         //layerMask = ~layerMask;
@@ -74,9 +86,11 @@ public class CameraController : MonoBehaviour
 
         else
         {
+            // aucun
             Debug.DrawRay(m_objectToLookAt.position, vecteurDiff, Color.white);
         }
     }
+   
     private float ClampAngle(float angle)
     {
         if (angle > 180)
