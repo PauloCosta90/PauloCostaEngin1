@@ -6,12 +6,16 @@ public class CameraController : MonoBehaviour
 {
     [SerializeField]
     private Transform m_objectToLookAt;
+
     [SerializeField]
     private float m_rotationSpeed = 1.0f;
+
     [SerializeField]
-    private float maxScrollDist = 5;
+    private float maxScrollDist = 50;
+
     [SerializeField]
-    private float minScrollDist = -5;
+    private float minScrollDist = -50;
+
     [SerializeField]
     private Vector2 m_clampingValue = Vector2.zero;
    
@@ -58,10 +62,10 @@ public class CameraController : MonoBehaviour
             // Todo: a check of distance if reach max et min distance
             // Todo: lerp plutot que d'effectuer immédiatement la translation
             float newDistance = Mathf.Clamp(transform.position.z + Input.mouseScrollDelta.y, minScrollDist, maxScrollDist);
-            transform.Translate(Vector3.forward * Input.mouseScrollDelta.y, Space.Self);
             Vector3 targetPosition = new Vector3(transform.position.x, transform.position.y, newDistance);
-            float lerpSpeed = 5.0f; // Adjust the speed as needed
+            float lerpSpeed = 100.0f;
             transform.position = Vector3.Lerp(transform.position, targetPosition, lerpSpeed * Time.deltaTime);
+            //transform.Translate(Vector3.forward * Input.mouseScrollDelta.y, Space.Self);
         }
     }
     

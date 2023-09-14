@@ -5,7 +5,7 @@ using UnityEngine;
 public class CharacterFloorTrigger : MonoBehaviour
 {
     public  bool IsOnFloor { get; private set; }
-    private void OnTriggerStay(Collision other)
+    private void OnTriggerStay(UnityEngine.Collider other)
     {
         if(!IsOnFloor)
         {
@@ -14,12 +14,10 @@ public class CharacterFloorTrigger : MonoBehaviour
         IsOnFloor = true;
     }
 
-    private void OnTriggerExit(Collider other)
+    private void OnTriggerExit(UnityEngine.Collider other)
     {
-        if (IsOnFloor)
-        {
-            Debug.Log("left the ground");
-        }
-        IsOnFloor = false;
+        
+       Debug.Log("left the ground");
+       IsOnFloor = false;
     }
 }
