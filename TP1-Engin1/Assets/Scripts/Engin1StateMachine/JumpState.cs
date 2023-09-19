@@ -15,13 +15,13 @@ public class JumpState : CharacterState
         //jump
         m_stateMachine.RB.AddForce(Vector3.up * m_stateMachine.JumpIntensity * m_stateMachine.AccelarationValue/2, ForceMode.Acceleration);
         m_currentStateTimer = STATE_EXIT_TIMER;
-        if (Input.GetKey(KeyCode.W))
-        {
-            var vectorApplidedOnFloorUp = UnityEngine.Vector3.ProjectOnPlane(m_stateMachine.Camera.transform.forward, UnityEngine.Vector3.up);
-            vectorApplidedOnFloorUp.Normalize();
-            m_stateMachine.RB.AddForce(vectorApplidedOnFloorUp * m_stateMachine.AccelarationValue, ForceMode.Acceleration);
-            m_stateMachine.RB.MovePosition(vectorApplidedOnFloorUp);
-        }
+        //if (Input.GetKey(KeyCode.W))
+        //{
+        //    var vectorApplidedOnFloorUp = UnityEngine.Vector3.ProjectOnPlane(m_stateMachine.Camera.transform.forward, UnityEngine.Vector3.up);
+        //    vectorApplidedOnFloorUp.Normalize();
+        //    m_stateMachine.RB.AddForce(vectorApplidedOnFloorUp * m_stateMachine.AccelarationValue, ForceMode.Acceleration);
+        //    m_stateMachine.RB.MovePosition(vectorApplidedOnFloorUp);
+        //}
     }
     public override void OnFixedUpdate()
     {

@@ -7,19 +7,24 @@ using UnityEngine;
 public class MainCharacterControllerStateMachine : MonoBehaviour
 {
     public Camera Camera { get; private set; }
+
+    [field: SerializeField]
     public Rigidbody RB { get; private set; }
+
+    [field: SerializeField]
+    private Animator Animator { get; set; }
     
     [field: SerializeField]
     public float AccelarationValue { get; private set; }
 
     [field: SerializeField]
-    public float MaxVelocity { get; private set; }
+    public float MaxForwardVelocity { get; private set; }
 
     [field: SerializeField]
     public float MaxSideVelocity { get; private set; }
 
     [field: SerializeField]
-    public float MaxBackwardsVelocity { get; private set; }
+    public float MaxBackwardVelocity { get; private set; }
 
     [field: SerializeField]
     public float JumpIntensity { get; private set; } = 100.0f;
@@ -43,7 +48,6 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
     void Start()
     {
         Camera = Camera.main;
-        RB = GetComponent<Rigidbody>();
 
         foreach (CharacterState state in m_possibleStates)
         {
@@ -95,4 +99,14 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
     {
         return m_floorTrigger.IsOnFloor;
     } 
+
+    public void UpdateAnimatorValues(UnityEngine.Vector2 moveVecValue)
+    {
+        // aller chercher la vitesse actuelle
+        //Communiquer directement avec mon Animator
+        //moveVecValue.Normalize();
+        moveVecValue = new UnityEngine.Vector2(moveVecValue.x, moveVecValue.y / MaxForwardVelocity);
+        Animator.SetFloat("moveX", moveVecValue.x);
+        Animator.SetFloat("moveY", moveVecValue.y);
+    }
 }

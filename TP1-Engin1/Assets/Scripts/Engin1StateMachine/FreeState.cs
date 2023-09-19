@@ -14,7 +14,7 @@ public class FreeState : CharacterState
     {
         //31 aout
         //Done: appliquer les déplacements relatifs a la caméra pour les autre directions.
-        //Todo: avoir des vitesse de déplacements maximale différente avec les cotés et le back.
+        //Done: avoir des vitesse de déplacements maximale différente avec les cotés et le back.
         //Done: lorsque aucun input est mis décelérer le character.
         //(composante x/ taille de votre vecteur) * vitesse de déplacements side +
         if (Input.GetKey(KeyCode.W))
@@ -23,18 +23,25 @@ public class FreeState : CharacterState
             vectorApplidedOnFloorUp.Normalize();
             //mon vecteur += (0,1)
             m_stateMachine.RB.AddForce(vectorApplidedOnFloorUp * m_stateMachine.AccelarationValue, ForceMode.Acceleration);
+            float fowardcomponent = Vector3.Dot(m_stateMachine.RB.velocity, vectorApplidedOnFloorUp);
+            m_stateMachine.UpdateAnimatorValues(new Vector2(0, fowardcomponent));
 
             if (Input.GetKeyUp(KeyCode.W))// décélération du character.
             {
                 m_stateMachine.RB.AddForce(vectorApplidedOnFloorUp * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
             }
 
+            if (m_stateMachine.RB.velocity.magnitude > m_stateMachine.MaxForwardVelocity)
+            {
+                m_stateMachine.RB.velocity = m_stateMachine.RB.velocity.normalized;
+                m_stateMachine.RB.velocity *= m_stateMachine.MaxForwardVelocity;
+            }
         }
-        if (m_stateMachine.RB.velocity.magnitude > m_stateMachine.MaxVelocity)
-        {
-            m_stateMachine.RB.velocity = m_stateMachine.RB.velocity.normalized;
-            m_stateMachine.RB.velocity *= m_stateMachine.MaxVelocity;
-        }
+        //if (m_stateMachine.RB.velocity.magnitude > m_stateMachine.MaxVelocity)
+        //{
+        //    m_stateMachine.RB.velocity = m_stateMachine.RB.velocity.normalized;
+        //    m_stateMachine.RB.velocity *= m_stateMachine.MaxVelocity;
+        //}
 
         if (Input.GetKey(KeyCode.S))
         {
@@ -45,6 +52,12 @@ public class FreeState : CharacterState
             if (Input.GetKeyUp(KeyCode.S))// décélération du character.
             {
                 m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
+            }
+
+            if (m_stateMachine.RB.velocity.magnitude > m_stateMachine.MaxBackwardVelocity)
+            {
+                m_stateMachine.RB.velocity = m_stateMachine.RB.velocity.normalized;
+                m_stateMachine.RB.velocity *= m_stateMachine.MaxBackwardVelocity;
             }
         }
 
@@ -58,6 +71,12 @@ public class FreeState : CharacterState
             {
                 m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
             }
+
+            if (m_stateMachine.RB.velocity.magnitude > m_stateMachine.MaxSideVelocity)
+            {
+                m_stateMachine.RB.velocity = m_stateMachine.RB.velocity.normalized;
+                m_stateMachine.RB.velocity *= m_stateMachine.MaxSideVelocity;
+            }
         }
 
         if (Input.GetKey(KeyCode.A))
@@ -69,6 +88,12 @@ public class FreeState : CharacterState
             if (Input.GetKeyUp(KeyCode.A))// décélération du character.
             {
                 m_stateMachine.RB.AddForce(vectorApplidedOnFloorDown * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
+            }
+
+            if (m_stateMachine.RB.velocity.magnitude > m_stateMachine.MaxSideVelocity)
+            {
+                m_stateMachine.RB.velocity = m_stateMachine.RB.velocity.normalized;
+                m_stateMachine.RB.velocity *= m_stateMachine.MaxSideVelocity;
             }
         }
     }

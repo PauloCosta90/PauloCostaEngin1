@@ -59,8 +59,8 @@ public class CameraController : MonoBehaviour
     {
         if (Input.mouseScrollDelta.y !=0)
         {
-            // Todo: a check of distance if reach max et min distance
-            // Todo: lerp plutot que d'effectuer immédiatement la translation
+            // Done: a check of distance if reach max et min distance
+            // Done: lerp plutot que d'effectuer immédiatement la translation
             float newDistance = Mathf.Clamp(transform.position.z + Input.mouseScrollDelta.y, minScrollDist, maxScrollDist);
             Vector3 targetPosition = new Vector3(transform.position.x, transform.position.y, newDistance);
             float lerpSpeed = 100.0f;
