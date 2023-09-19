@@ -19,16 +19,17 @@ public class FreeState : CharacterState
         //(composante x/ taille de votre vecteur) * vitesse de déplacements side +
         if (Input.GetKey(KeyCode.W))
         {
-            var vectorApplidedOnFloorUp = UnityEngine.Vector3.ProjectOnPlane(m_stateMachine.Camera.transform.forward, UnityEngine.Vector3.up);
-            vectorApplidedOnFloorUp.Normalize();
+            var vectorApplidedOnFloor = UnityEngine.Vector3.ProjectOnPlane(m_stateMachine.Camera.transform.forward, UnityEngine.Vector3.up);
+            vectorApplidedOnFloor.Normalize();
             //mon vecteur += (0,1)
-            m_stateMachine.RB.AddForce(vectorApplidedOnFloorUp * m_stateMachine.AccelarationValue, ForceMode.Acceleration);
-            float fowardcomponent = Vector3.Dot(m_stateMachine.RB.velocity, vectorApplidedOnFloorUp);
+            m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue, ForceMode.Acceleration);
+
+            float fowardcomponent = Vector3.Dot(m_stateMachine.RB.velocity, vectorApplidedOnFloor);
             m_stateMachine.UpdateAnimatorValues(new Vector2(0, fowardcomponent));
 
             if (Input.GetKeyUp(KeyCode.W))// décélération du character.
             {
-                m_stateMachine.RB.AddForce(vectorApplidedOnFloorUp * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
+                m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
             }
 
             if (m_stateMachine.RB.velocity.magnitude > m_stateMachine.MaxForwardVelocity)
@@ -49,6 +50,9 @@ public class FreeState : CharacterState
             vectorApplidedOnFloor.Normalize();
             m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue, ForceMode.Acceleration);
 
+            float fowardcomponent = Vector3.Dot(m_stateMachine.RB.velocity, vectorApplidedOnFloor);
+            m_stateMachine.UpdateAnimatorValues(new Vector2(0, fowardcomponent));
+
             if (Input.GetKeyUp(KeyCode.S))// décélération du character.
             {
                 m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
@@ -67,6 +71,9 @@ public class FreeState : CharacterState
             vectorApplidedOnFloor.Normalize();
             m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue, ForceMode.Acceleration);
 
+            float fowardcomponent = Vector3.Dot(m_stateMachine.RB.velocity, vectorApplidedOnFloor);
+            m_stateMachine.UpdateAnimatorValues(new Vector2(fowardcomponent,0));
+
             if (Input.GetKeyUp(KeyCode.D))// décélération du character.
             {
                 m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
@@ -81,13 +88,16 @@ public class FreeState : CharacterState
 
         if (Input.GetKey(KeyCode.A))
         {
-            var vectorApplidedOnFloorDown = UnityEngine.Vector3.ProjectOnPlane(m_stateMachine.Camera.transform.right * -1, UnityEngine.Vector3.down);
-            vectorApplidedOnFloorDown.Normalize();
-            m_stateMachine.RB.AddForce(vectorApplidedOnFloorDown * m_stateMachine.AccelarationValue, ForceMode.Acceleration);
+            var vectorApplidedOnFloor = UnityEngine.Vector3.ProjectOnPlane(m_stateMachine.Camera.transform.right * -1, UnityEngine.Vector3.down);
+            vectorApplidedOnFloor.Normalize();
+            m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue, ForceMode.Acceleration);
+
+            float fowardcomponent = Vector3.Dot(m_stateMachine.RB.velocity, vectorApplidedOnFloor);
+            m_stateMachine.UpdateAnimatorValues(new Vector2(fowardcomponent, 0));
 
             if (Input.GetKeyUp(KeyCode.A))// décélération du character.
             {
-                m_stateMachine.RB.AddForce(vectorApplidedOnFloorDown * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
+                m_stateMachine.RB.AddForce(vectorApplidedOnFloor * m_stateMachine.AccelarationValue * -1, ForceMode.Acceleration);
             }
 
             if (m_stateMachine.RB.velocity.magnitude > m_stateMachine.MaxSideVelocity)
@@ -108,10 +118,16 @@ public class FreeState : CharacterState
         Debug.Log("On exit: free state");
     }
 
-    public override bool CanEnter()
+    public override bool CanEnter(CharacterState currentState)
     {
-     //Je ne peux changer de state si je ne touche pas le sol 
-        return m_stateMachine.IsOnContactWithFloor();
+        if(currentState is JumpState)
+        {
+            // si true,c'est que je suis présentement dans le jump state et je veux entrer dans free
+            //Je ne peux changer de state si je ne touche pas le sol 
+            return m_stateMachine.IsOnContactWithFloor();
+        }
+
+        return false;
     }
 
     public override bool CanExit()

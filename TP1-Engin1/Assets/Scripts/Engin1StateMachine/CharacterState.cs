@@ -25,12 +25,12 @@ public abstract class CharacterState : IState
     {
 
     }
-    public virtual bool CanEnter()
+    public virtual bool CanEnter(CharacterState state)
     {
-        return true;
+        throw new System.NotImplementedException();
     }
     public virtual bool CanExit()
     {
-        return true;
+        throw new System.NotImplementedException();
     }
 }

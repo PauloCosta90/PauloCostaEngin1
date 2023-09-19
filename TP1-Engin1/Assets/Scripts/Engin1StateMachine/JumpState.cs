@@ -36,10 +36,15 @@ public class JumpState : CharacterState
         Debug.Log("On exit: jump state");
 
     }
-    public override bool CanEnter()
+    public override bool CanEnter(CharacterState currentState)
     {
         //this must be run in update
-        return Input.GetKeyDown(KeyCode.Space);
+        if (currentState is FreeState)
+        {
+            return Input.GetKeyDown(KeyCode.Space);
+        }
+
+        return false;
     }
     public override bool CanExit()
     {

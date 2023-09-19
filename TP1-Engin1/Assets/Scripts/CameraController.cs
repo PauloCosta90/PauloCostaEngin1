@@ -11,10 +11,10 @@ public class CameraController : MonoBehaviour
     private float m_rotationSpeed = 1.0f;
 
     [SerializeField]
-    private float maxScrollDist = 50;
+    private float maxScrollDist = 60;
 
     [SerializeField]
-    private float minScrollDist = -50;
+    private float minScrollDist = -60;
 
     [SerializeField]
     private Vector2 m_clampingValue = Vector2.zero;
