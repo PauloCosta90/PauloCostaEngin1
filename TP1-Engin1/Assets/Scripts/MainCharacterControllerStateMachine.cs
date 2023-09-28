@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public class MainCharacterControllerStateMachine : MonoBehaviour
 {
@@ -31,6 +32,8 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
 
     [SerializeField]
     private CharacterFloorTrigger m_floorTrigger;
+    [SerializeField]
+    private CharacterRoodTrigger m_roodTrigger;
     private CharacterState m_currentState;
     private List<CharacterState> m_possibleStates;
 
@@ -39,10 +42,11 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
         m_possibleStates = new List<CharacterState>();
         m_possibleStates.Add(new FreeState());
         m_possibleStates.Add(new JumpState());
-        //m_possibleStates.Add(new AttackState());
-        //m_possibleStates.Add(new HitState());
-        //m_possibleStates.Add(new OnGroundState());
-        //m_possibleStates.Add(new GetUpState());
+        m_possibleStates.Add(new AttackState());
+        m_possibleStates.Add(new HitState());
+        m_possibleStates.Add(new FallingState());
+        m_possibleStates.Add(new OnGroundState());
+        m_possibleStates.Add(new GetUpState());
     }
 
     void Start()
@@ -55,6 +59,8 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
         }
         m_currentState = m_possibleStates[0];
         m_currentState.OnEnter();
+        IsOnContactWithFloor();
+        Animator.SetBool("OnHit", false);
     }
     
     void FixedUpdate()
@@ -94,19 +100,63 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
             }
         }
     }
-   
+
     public bool IsOnContactWithFloor()
     {
+        Animator.SetBool("OnGround", true);
         return m_floorTrigger.IsOnFloor;
-    } 
+    }
 
-    public void UpdateAnimatorValues(UnityEngine.Vector2 moveVecValue)
+    public bool IsInMidair()
+    {
+        Animator.SetBool("OnGround", false);
+        return m_floorTrigger.IsOnFloor;
+    }
+
+    public bool IsOnContactWithRood()
+    {
+        if (m_roodTrigger.IsTouchingRood == true)
+        { 
+          Animator.SetBool("OnHit", true);
+          return true;
+        }
+        Animator.SetBool("OnHit", false);
+        return false;
+    }
+
+    public void JumpTrigger()
+    {
+        Animator.SetTrigger("Jump");
+    }
+
+    public void AttackTrigger()
+    {
+        Animator.SetTrigger("Attack");
+    }
+
+    public void LandTrigger()
+    {
+        Animator.SetTrigger("Land");
+    }
+
+    public void CrashTrigger()
+    {
+        Animator.SetTrigger("Crash");
+    }
+
+    public void FixedUpdateAnimatorValues(UnityEngine.Vector2 moveVecValue)
     {
         // aller chercher la vitesse actuelle
         //Communiquer directement avec mon Animator
         //moveVecValue.Normalize();
-        moveVecValue = new UnityEngine.Vector2(moveVecValue.x, moveVecValue.y / MaxForwardVelocity);
-        Animator.SetFloat("moveX", moveVecValue.x);
-        Animator.SetFloat("moveY", moveVecValue.y);
+        moveVecValue = new UnityEngine.Vector2(moveVecValue.x, moveVecValue.y);
+        Animator.SetFloat("MoveX", moveVecValue.x);
+        Animator.SetFloat("MoveY", moveVecValue.y);
+
+        if(moveVecValue == null)
+        {
+            Animator.SetFloat("MoveX", 0);
+            Animator.SetFloat("MoveY", 0);
+        }
     }
 }
