@@ -18,14 +18,8 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     private float minScrollDist = -90;
 
-    public Transform m_transform;
-    private Vector3 m_offset = Vector3.zero;
-    public float m_smoothSpeed = 0.5f;
-
-    private void Start()
-    {
-        m_offset = transform.position - m_transform.position;
-    }
+    private float m_desiredDistance = 8.0f;
+    private float m_lerpSpeed = 0.1f;
 
     void Update()
     {
@@ -36,21 +30,23 @@ public class CameraController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        FixedUpdateCameraLerp();
         FixedUpdateMoveCameraFromObstruction();
     }
-
+   
     private void UpdateHorizontalMove()
     {
         // angle en degrée. Sin donnne la composante y du cercle et Cos donne la composante x du cercle
         float currentAngleX = Input.GetAxis("Mouse X") * m_rotationSpeed;
         transform.RotateAround(m_objectToLookAt.position, m_objectToLookAt.up, currentAngleX);
     }
-   
+
     private void UpdateVerticalMove()
     {
         // angle en degrée. Sin donnne la composante y du cercle et Cos donne la composante x du cercle
         float currentAngleY = Input.GetAxis("Mouse Y") * m_rotationSpeed;
         float eulerAngleX = transform.rotation.eulerAngles.x;
+
         float comparisonAngle = eulerAngleX + currentAngleY;
 
         comparisonAngle = ClampAngle(comparisonAngle);
@@ -62,20 +58,24 @@ public class CameraController : MonoBehaviour
         transform.RotateAround(m_objectToLookAt.position, transform.right, currentAngleY);
 
     }
-
+    
     private void UpdateCameraScroll()
     {
         if (Input.mouseScrollDelta.y != 0)
         {
             // Done: a check of distance if reach max et min distance
-            // Done: lerp plutot que d'effectuer immédiatement la translation
-            float newDistance = Mathf.Clamp(transform.position.z + Input.mouseScrollDelta.y, minScrollDist, maxScrollDist);
-            Vector3 targetPosition = new Vector3(transform.position.x, transform.position.y, newDistance);
-            float lerpSpeed = 100.0f;
-            transform.position = Vector3.Lerp(transform.position, targetPosition, lerpSpeed * Time.deltaTime);
+            m_desiredDistance -= Input.mouseScrollDelta.y;
+            m_desiredDistance = Mathf.Clamp(m_desiredDistance, minScrollDist, maxScrollDist);
         }
     }
 
+    private void FixedUpdateCameraLerp()
+    {
+        // Done: lerp plutot que d'effectuer immédiatement la translation
+        var desiredPosition = m_objectToLookAt.position - (transform.forward * m_desiredDistance);
+        transform.position = Vector3.Lerp(transform.position, desiredPosition, m_lerpSpeed);
+    }
+    
     private void FixedUpdateMoveCameraFromObstruction()
     {
         // Bit shift the index of the layer (8) to get a bit mask

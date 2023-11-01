@@ -1,6 +1,8 @@
 
 public interface IState
 {
+    public void OnStart();
+
     public void OnEnter();
 
     public void OnFixedUpdate();
@@ -9,7 +11,7 @@ public interface IState
 
     public void OnExit();
 
-    public bool CanEnter(CharacterState state);
+    public bool CanEnter(IState currentState);
 
     public bool CanExit();
 }

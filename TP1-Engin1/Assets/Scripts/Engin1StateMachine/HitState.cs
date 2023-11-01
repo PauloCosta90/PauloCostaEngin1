@@ -6,20 +6,31 @@ using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class HitState : CharacterState
 {
+    //private float m_noTimer = 0.0f;
+    //private float m_shakeTimer = 1.2f;
+
     public override void OnEnter()
     {
-        Debug.Log("On enter: hit state");
+        
+        m_stateMachine.OnHitStimuliReceived = false;
         m_stateMachine.IsOnContactWithRood();
+        m_stateMachine.EffectsController.PlaySound(EActionType.Hit);
+        m_stateMachine.EffectsController.PlaySVFXSystem(EActionType.Hit);
+        Debug.Log("On enter: hit state");
     }
 
     public override void OnFixedUpdate()
     {
-
+       
     }
-
+  
     public override void OnUpdate()
     {
-      
+        //m_shakeTimer -= Time.deltaTime;
+        //if(m_shakeTimer <= m_noTimer)
+        //{
+        //    m_stateMachine;
+        //}
     }
 
     public override void OnExit()
@@ -28,9 +39,8 @@ public class HitState : CharacterState
         m_stateMachine.IsOnContactWithRood();
     }
 
-    public override bool CanEnter(CharacterState currentState)
+    public override bool CanEnter(IState currentState)
     {
-        //this must be run in update
         if (currentState is FreeState)
         {
             return m_stateMachine.IsOnContactWithRood();

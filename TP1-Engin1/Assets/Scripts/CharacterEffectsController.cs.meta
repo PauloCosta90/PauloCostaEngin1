@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4e9fefdec463f4b489881769c1bae60d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_audioSource: {instanceID: 0}
+  - m_jumpAudioClip: {fileID: 8300000, guid: 9c804d05941a1544297cc46bbaf44129, type: 3}
+  - m_landingAudioClip: {fileID: 8300000, guid: 382c84412a47b2744a9d35e5141f5a72, type: 3}
+  - m_attackAudioClip: {fileID: 8300000, guid: c7a77605ae0afe040b2f459b7c5dac80, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

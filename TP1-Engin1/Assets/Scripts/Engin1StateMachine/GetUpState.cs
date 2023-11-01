@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class GetUpState : CharacterState
 {
-    private const float STATE_EXIT_TIMER = 1.0f;
+    private const float GETUP_EXIT_TIME = 1.0f;
     private float m_currentStateTimer = 0.0f;
 
     public override void OnEnter()
     {
         Debug.Log("On enter: get up state");
-        m_currentStateTimer = STATE_EXIT_TIMER;
+        m_currentStateTimer = GETUP_EXIT_TIME;
     }
 
     public override void OnFixedUpdate()
@@ -29,7 +29,7 @@ public class GetUpState : CharacterState
         m_stateMachine.IsOnContactWithFloor();
     }
 
-    public override bool CanEnter(CharacterState currentState)
+    public override bool CanEnter(IState currentState)
     {
         //this must be run in update
         if (currentState is OnGroundState)
@@ -42,6 +42,6 @@ public class GetUpState : CharacterState
 
     public override bool CanExit()
     {
-        return true;
+        return m_currentStateTimer <= 0;
     }
 }

@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
@@ -5,18 +6,29 @@ using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
 
-public class MainCharacterControllerStateMachine : MonoBehaviour
+public class MainCharacterControllerStateMachine : GenericStateMachine<CharacterState>, IDamageable
 {
     public Camera Camera { get; private set; }
+
+    //public CinemachineVirtualCamera VirtualCamera { get; private set; }
 
     [field: SerializeField]
     public Rigidbody RB { get; private set; }
 
     [field: SerializeField]
-    private Animator Animator { get; set; }
-    
+    public Animator Animator { get; private set; }
+
+    [field:SerializeField]
+    public CharacterEffectsController EffectsController { get; private set; }
+
     [field: SerializeField]
-    public float AccelarationValue { get; private set; }
+    public float AccelerationValue { get; private set; }
+
+    [field: SerializeField]
+    public float InAirAccelerationValue { get; private set; } = 0.2f;
+   
+    [field: SerializeField]
+    public float DecelerationValue { get; private set; } = 0.3f;
 
     [field: SerializeField]
     public float MaxForwardVelocity { get; private set; }
@@ -27,17 +39,23 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
     [field: SerializeField]
     public float MaxBackwardVelocity { get; private set; }
 
-    [field: SerializeField]
-    public float JumpIntensity { get; private set; } = 100.0f;
+    private UnityEngine.Vector2 CurrentRelativeVelocity { get; set; }
+    public UnityEngine.Vector2 CurrentDirectionalInputs { get; private set; }
+    public bool OnHitStimuliReceived { get; set; } = false;
+    public bool OnStunStimuliReceived { get; set; } = false;
+    public bool InNonGameplayState { get; set; } = false;
 
+   [field: SerializeField]
+    public float JumpIntensity { get; private set; } = 1000.0f;
+
+    [SerializeField]
+    private GameObject m_ArmHitbox;
     [SerializeField]
     private CharacterFloorTrigger m_floorTrigger;
     [SerializeField]
     private CharacterRoodTrigger m_roodTrigger;
-    private CharacterState m_currentState;
-    private List<CharacterState> m_possibleStates;
 
-    private void Awake()
+    protected override void CreatePossibleStates()
     {
         m_possibleStates = new List<CharacterState>();
         m_possibleStates.Add(new FreeState());
@@ -47,12 +65,13 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
         m_possibleStates.Add(new FallingState());
         m_possibleStates.Add(new OnGroundState());
         m_possibleStates.Add(new GetUpState());
+        m_possibleStates.Add(new NonGameplayState());
     }
 
-    void Start()
+    protected override void Start()
     {
         Camera = Camera.main;
-
+        //VirtualCamera = GetComponent<CinemachineVirtualCamera>();
         foreach (CharacterState state in m_possibleStates)
         {
             state.OnStart(this);
@@ -62,45 +81,17 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
         IsOnContactWithFloor();
         Animator.SetBool("OnHit", false);
     }
+
+    protected override void FixedUpdate()
+    {
+        base.FixedUpdate();
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+    }
     
-    void FixedUpdate()
-    {
-        m_currentState.OnFixedUpdate();
-    }
-
-    private void Update()
-    {
-        m_currentState.OnUpdate();
-        TryToTransitionState();
-    }
-   
-    private void TryToTransitionState()
-    {
-        if (!m_currentState.CanExit())
-        {
-            return;
-        }
-
-        // Je PEUX quitter le state actuel
-        foreach (var state in m_possibleStates)
-        {
-            if (m_currentState == state)
-            {
-                continue;
-            }
-
-            if (state.CanEnter(m_currentState))
-            {
-                //Quitter le state actuel
-                m_currentState.OnExit();
-                m_currentState = state;
-                //Rentrer dans le state state
-                m_currentState.OnEnter();
-                return;
-            }
-        }
-    }
-
     public bool IsOnContactWithFloor()
     {
         Animator.SetBool("OnGround", true);
@@ -124,6 +115,11 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
         return false;
     }
 
+    //public void IsShakingCamera()
+    //{
+    //  VirtualCamera
+    //}
+
     public void JumpTrigger()
     {
         Animator.SetTrigger("Jump");
@@ -144,19 +140,38 @@ public class MainCharacterControllerStateMachine : MonoBehaviour
         Animator.SetTrigger("Crash");
     }
 
-    public void FixedUpdateAnimatorValues(UnityEngine.Vector2 moveVecValue)
+    public void ReceiveDamage(EDamageType damageType)
+    {
+        if (damageType == EDamageType.Normal)
+        {
+            OnHitStimuliReceived = true;
+        }
+        if (damageType == EDamageType.Stunning)
+        {
+            OnStunStimuliReceived = true;
+        }
+    }
+
+    public void UpdateAnimatorValues(UnityEngine.Vector2 moveVecValue)
     {
         // aller chercher la vitesse actuelle
         //Communiquer directement avec mon Animator
         //moveVecValue.Normalize();
         moveVecValue = new UnityEngine.Vector2(moveVecValue.x, moveVecValue.y);
-        Animator.SetFloat("MoveX", moveVecValue.x);
-        Animator.SetFloat("MoveY", moveVecValue.y);
+        //Animator.SetFloat("MoveX", CurrentRelativeVelocity.x / GetCurrentMaxSpeed());
+        //Animator.SetFloat("MoveY", CurrentRelativeVelocity.y / GetCurrentMaxSpeed());
+        Animator.SetBool("OnGround", m_floorTrigger.IsOnFloor);
 
-        if(moveVecValue == null)
+        if (moveVecValue == null)
         {
             Animator.SetFloat("MoveX", 0);
             Animator.SetFloat("MoveY", 0);
         }
+    }
+
+    public void OnEnabledHitBox( bool isEnabled = true)
+    {
+        Debug.Log("punch hitbox : "+ isEnabled);
+        m_ArmHitbox?.SetActive(isEnabled);
     }
 }
